@@ -1744,10 +1744,27 @@ Parser::ParsePostfixExpressionSuffix(ExprResult LHS) {
                                                    MayBePseudoDestructor);
         if (LHS.isInvalid())
           break;
+      
+        //EG BEGIN
+        bool bAllowEGTypePath = false;
+        if( clang_eg::isTypePathsEnabled() )
+        {
+            if( !LHS.isInvalid() )
+            {
+                bAllowEGTypePath = clang_eg::isPossibleEGType( LHS.get()->getType() );
+            }
+        }
 
         ParseOptionalCXXScopeSpecifier(SS, ObjectType,
                                        /*EnteringContext=*/false,
-                                       &MayBePseudoDestructor);
+                                       &MayBePseudoDestructor, 
+                                      /*bool IsTypename =*/ false,
+                                      /*IdentifierInfo **LastII =*/ nullptr,
+                                      /*bool OnlyNamespace =*/ false,
+                                      bAllowEGTypePath );
+                                       
+        //EG END
+        
         if (SS.isNotEmpty())
           ObjectType = nullptr;
       }

@@ -1289,7 +1289,14 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
     if (!getLangOpts().ObjC && Next.is(tok::identifier))
       return TPResult::True;
 
-    if (Next.isNot(tok::coloncolon) && Next.isNot(tok::less)) {
+    //EG BEGIN
+    //check for period to support period delimited eg type paths
+    if (    Next.isNot(tok::coloncolon) && 
+            Next.isNot(tok::less) && 
+            ( !clang_eg::isTypePathsEnabled() || Next.isNot(tok::period) )
+            ) 
+    {
+    //EG END
       // Determine whether this is a valid expression. If not, we will hit
       // a parse error one way or another. In that case, tell the caller that
       // this is ambiguous. Typo-correct to type and expression keywords and
@@ -1601,6 +1608,34 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
   case tok::kw___float128:
   case tok::kw_void:
   case tok::annot_decltype:
+  
+    //EG BEGIN
+    if (NextToken().is(tok::l_paren) && clang_eg::isTypePathsEnabled() && !isEGTypePathParsing() )
+    {
+        //if this is an eg type then always return true since it followed by l_paren
+        //MUST be an eg invocation
+        
+        if( clang_eg::isPossibleEGTypeIdentifier( *Tok.getIdentifierInfo() ) )
+        {
+            return TPResult::False;
+        }
+        
+		/*if ( Tok.getAnnotationValue() )
+		{
+            ParsedType parsedType = getTypeAnnotation( Tok );
+
+            TypeSourceInfo *TInfo;
+            QualType typeQualType = Actions.GetTypeFromParser( parsedType, &TInfo );
+
+            if( clang_eg::isEGType( typeQualType ) )
+            {
+                return TPResult::False;
+            }
+        }*/
+        return TPResult::Ambiguous;
+    }
+    else 
+    //EG END
     if (NextToken().is(tok::l_paren))
       return TPResult::Ambiguous;
 

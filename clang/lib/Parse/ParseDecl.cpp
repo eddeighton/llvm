@@ -5727,7 +5727,9 @@ void Parser::ParseDirectDeclarator(Declarator &D) {
     }
   }
 
-  if (Tok.is(tok::l_paren)) {
+  //EG BEGIN
+  if (Tok.is(tok::l_paren) && ( !clang_eg::isTypePathsEnabled() || !isEGTypePathParsing() ) ) {
+  //EG END
     // If this might be an abstract-declarator followed by a direct-initializer,
     // check whether this is a valid declarator chunk. If it can't be, assume
     // that it's an initializer instead.
@@ -5824,7 +5826,9 @@ void Parser::ParseDirectDeclarator(Declarator &D) {
     MaybeParseCXX11Attributes(D);
 
   while (1) {
-    if (Tok.is(tok::l_paren)) {
+    //EG BEGIN
+    if (Tok.is(tok::l_paren) && ( !clang_eg::isTypePathsEnabled() || !isEGTypePathParsing() ) ) {
+    //EG END
       // Enter function-declaration scope, limiting any declarators to the
       // function prototype scope, including parameter declarators.
       ParseScope PrototypeScope(this,

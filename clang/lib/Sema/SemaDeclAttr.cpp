@@ -5227,6 +5227,58 @@ static void handleObjCPreciseLifetimeAttr(Sema &S, Decl *D,
                                      AL.getAttributeSpellingListIndex()));
 }
 
+//EG BEGIN
+static void handleEGTypeAttribute(Sema &S, Decl *D, const ParsedAttr &AL)
+{
+  if (AL.getNumArgs() > 1) {
+    S.Diag(AL.getLoc(), diag::err_attribute_too_many_arguments) << AL << 1;
+    return;
+  }
+  
+    Expr *EGTypeIDExpr;
+    if ( AL.isArgIdent(0)) {
+      // Special case where the argument is a template id.
+      CXXScopeSpec SS;
+      SourceLocation TemplateKWLoc;
+      UnqualifiedId id;
+      id.setIdentifier( AL.getArgAsIdent(0)->Ident, AL.getLoc());
+
+      ExprResult AddrSpace = S.ActOnIdExpression(
+          S.getCurScope(), SS, TemplateKWLoc, id, false, false);
+      if (AddrSpace.isInvalid())
+        return;
+
+      EGTypeIDExpr = static_cast<Expr *>(AddrSpace.get());
+    } else {
+      EGTypeIDExpr = static_cast<Expr *>( AL.getArgAsExpr(0));
+    }
+    
+    if( EGTypeIDExpr )
+    {
+        //EGTypeIDExpr get int from the expr
+        llvm::APSInt intValue;
+        if( EGTypeIDExpr->isIntegerConstantExpr( intValue, S.Context ) )
+        {
+            D->addAttr(::new (S.Context)
+                 EGTypeIDAttr(AL.getRange(), S.Context, intValue.getExtValue(),
+                            AL.getAttributeSpellingListIndex()));
+        }
+        else
+        {
+          if (AL.getNumArgs() > 1) {
+            S.Diag(AL.getLoc(), diag::err_attribute_argument_type) << AL;
+            return;
+          }
+        }
+    }
+    else
+    {
+        S.Diag(AL.getLoc(), diag::err_attribute_argument_type) << AL;
+        return;
+    }
+}
+//EG END
+
 //===----------------------------------------------------------------------===//
 // Microsoft specific attribute handlers.
 //===----------------------------------------------------------------------===//
@@ -7013,6 +7065,11 @@ static void ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D,
   case ParsedAttr::AT_ObjCExternallyRetained:
     handleObjCExternallyRetainedAttr(S, D, AL);
     break;
+  //EG BEGIN
+  case ParsedAttr::AT_EGTypeID:
+    handleEGTypeAttribute( S, D, AL);
+    break;
+  //EG END
   }
 }
 

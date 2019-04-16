@@ -7007,6 +7007,38 @@ static void HandleVectorSizeAttr(QualType &CurType, const ParsedAttr &Attr,
     Attr.setInvalid();
 }
 
+//EG BEGIN
+static void handleEGTypeAttribute(QualType &CurType, const ParsedAttr &Attr, Sema &S)
+{
+    // Check the attribute arguments.
+  if (Attr.getNumArgs() != 1) {
+    S.Diag(Attr.getLoc(), diag::err_attribute_wrong_number_arguments) << Attr
+                                                                      << 1;
+    Attr.setInvalid();
+    return;
+  }
+
+  Expr *SizeExpr;
+  // Special case where the argument is a template id.
+  if (Attr.isArgIdent(0)) {
+    CXXScopeSpec SS;
+    SourceLocation TemplateKWLoc;
+    UnqualifiedId Id;
+    Id.setIdentifier(Attr.getArgAsIdent(0)->Ident, Attr.getLoc());
+
+    ExprResult Size = S.ActOnIdExpression(S.getCurScope(), SS, TemplateKWLoc,
+                                          Id, false, false);
+
+    if (Size.isInvalid())
+      return;
+    SizeExpr = Size.get();
+  } else {
+    SizeExpr = Attr.getArgAsExpr(0);
+  }
+    
+}
+//EG END
+
 /// Process the OpenCL-like ext_vector_type attribute when it occurs on
 /// a type.
 static void HandleExtVectorTypeAttr(QualType &CurType, const ParsedAttr &Attr,

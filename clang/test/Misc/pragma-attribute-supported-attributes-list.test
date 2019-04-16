@@ -45,6 +45,7 @@
 // CHECK-NEXT: DLLImport (SubjectMatchRule_function, SubjectMatchRule_variable, SubjectMatchRule_record, SubjectMatchRule_objc_interface)
 // CHECK-NEXT: Destructor (SubjectMatchRule_function)
 // CHECK-NEXT: DisableTailCalls (SubjectMatchRule_function, SubjectMatchRule_objc_method)
+// CHECK-NEXT: EGTypeID (SubjectMatchRule_record)
 // CHECK-NEXT: EnableIf (SubjectMatchRule_function)
 // CHECK-NEXT: EnumExtensibility (SubjectMatchRule_enum)
 // CHECK-NEXT: ExcludeFromExplicitInstantiation (SubjectMatchRule_variable, SubjectMatchRule_function, SubjectMatchRule_record)

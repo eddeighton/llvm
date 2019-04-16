@@ -3171,3 +3171,10 @@ def ObjCExternallyRetained : InheritableAttr {
   let Subjects = SubjectList<[NonParmVar, Function, Block, ObjCMethod]>;
   let Documentation = [ObjCExternallyRetainedDocs];
 }
+
+def EGTypeID : Attr {
+  let Spellings = [Clang<"eg_type", 0>];
+  let Subjects = SubjectList<[CXXRecord]>;
+  let Args = [IntArgument<"id">];
+  let Documentation = [Undocumented];
+}

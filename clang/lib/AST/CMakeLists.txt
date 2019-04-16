@@ -80,4 +80,5 @@ add_clang_library(clangAST
   LINK_LIBS
   clangBasic
   clangLex
+  clangEG
   )
