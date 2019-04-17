@@ -1757,7 +1757,7 @@ private:
                                       
   //EG BEGIN
   bool isPossibleEGTypePath();         
-  //bool isPossibleEGInvocation();
+  bool isPossibleEGInvocation();
   
   bool ParsePossibleEGTypePath( CXXScopeSpec &SS,
        ParsedType ObjectType,
@@ -2601,6 +2601,9 @@ private:
                                          SourceLocation StartLoc,
                                          SourceLocation EndLoc);
   void ParseUnderlyingTypeSpecifier(DeclSpec &DS);
+//EG BEGIN
+  void ParseEGResultTypeSpecifier(DeclSpec &DS);
+//EG END
   void ParseAtomicSpecifier(DeclSpec &DS);
 
   ExprResult ParseAlignArgument(SourceLocation Start,

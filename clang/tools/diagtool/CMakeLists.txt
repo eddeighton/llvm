@@ -16,6 +16,7 @@ target_link_libraries(diagtool
   PRIVATE
   clangBasic
   clangFrontend
+  clangEG
   )
 
 if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)

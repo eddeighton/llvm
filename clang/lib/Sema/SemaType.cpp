@@ -1556,6 +1556,20 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
     }
     break;
 
+//EG BEGIN
+  case DeclSpec::TST_egResultType:
+    Result = S.GetTypeFromParser(DS.getRepAsType());
+    assert(!Result.isNull() && "Didn't get a type for __eg_result_type?");
+    Result = S.BuildUnaryTransformType(Result,
+                                       UnaryTransformType::EGResultType,
+                                       DS.getTypeSpecTypeLoc());
+    if (Result.isNull()) {
+      Result = Context.IntTy;
+      declarator.setInvalidType(true);
+    }
+    break;
+//EG END
+    
   case DeclSpec::TST_auto:
     Result = Context.getAutoType(QualType(), AutoTypeKeyword::Auto, false);
     break;
@@ -5377,7 +5391,10 @@ namespace {
     }
     void VisitUnaryTransformTypeLoc(UnaryTransformTypeLoc TL) {
       // FIXME: This holds only because we only have one unary transform.
-      assert(DS.getTypeSpecType() == DeclSpec::TST_underlyingType);
+      assert( ( DS.getTypeSpecType() == DeclSpec::TST_underlyingType )
+//EG BEGIN
+        || ( DS.getTypeSpecType() == DeclSpec::TST_egResultType ));
+//EG END
       TL.setKWLoc(DS.getTypeSpecTypeLoc());
       TL.setParensRange(DS.getTypeofParensRange());
       assert(DS.getRepAsType());
@@ -8217,6 +8234,15 @@ QualType Sema::BuildUnaryTransformType(QualType BaseType,
       return Context.getUnaryTransformType(BaseType, Underlying,
                                         UnaryTransformType::EnumUnderlyingType);
     }
+//EG BEGIN
+  case UnaryTransformType::EGResultType:
+      {
+          QualType resultType = BaseType;
+          clang_eg::eg_getInvocationResultType( BaseType, resultType );
+          return Context.getUnaryTransformType( BaseType, resultType,
+                                            UnaryTransformType::EGResultType );
+      }
+//EG END
   }
   llvm_unreachable("unknown unary transform type");
 }

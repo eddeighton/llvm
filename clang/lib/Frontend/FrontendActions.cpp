@@ -838,6 +838,9 @@ void PrintPreambleAction::ExecuteAction() {
   case InputKind::OpenCL:
   case InputKind::CUDA:
   case InputKind::HIP:
+//EG BEGIN
+  case InputKind::EG_CXX:
+//EG END
     break;
 
   case InputKind::Unknown:

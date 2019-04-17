@@ -19,4 +19,5 @@ target_link_libraries(ClangCodeGenTests
   clangLex
   clangParse
   clangSerialization
+  clangEG
   )

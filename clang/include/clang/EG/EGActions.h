@@ -1,40 +1,74 @@
-//===-- ARCMT.h - ARC Migration Rewriter ------------------------*- C++ -*-===//
-//
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
+//===-- EGActions.h - EG Frontend Action for EG compilation ---------------===//
+
+
 #ifndef LLVM_CLANG_EG_ACTIONS_H
 #define LLVM_CLANG_EG_ACTIONS_H
 
-#include "clang/ARCMigrate/FileRemapper.h"
+#include "clang/EG/EGDatabase.h"
+
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/MultiplexConsumer.h"
 #include "clang/Frontend/FrontendAction.h"
+
 #include <memory>
 
 namespace clang {
 
 namespace clang_eg {
      
-//class EGDatabase;
-
-class EGAction : public WrapperFrontendAction 
+class eg_action : public WrapperFrontendAction 
 {
 protected:
-    bool BeginInvocation(CompilerInstance &CI) override;
+    bool BeginInvocation(CompilerInstance &CI) override
+    {
+        if( !CI.getFrontendOpts().EGDatabasePath.empty() )
+        {
+            if( CI.getFrontendOpts().EGTranslationUnitDatabasePath.empty() )
+            {
+                eg_initialiseMode_Interface( CI.getFrontendOpts().EGDatabasePath.c_str() );
+            }
+            else
+            {
+                eg_initialiseMode_Operations( 
+                    CI.getFrontendOpts().EGDatabasePath.c_str(),
+                    CI.getFrontendOpts().EGTranslationUnitDatabasePath.c_str(),
+                    CI.getFrontendOpts().EGTranslationUnitID );
+            }
+        }
+        else
+        {
+            eg_initialiseMode_Implementation();
+        }
+        
+        return true;
+    }
 
-    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef InFile) override;
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef InFile) override
+    {
+        std::vector< std::unique_ptr< ASTConsumer> > Consumers;
+      
+        Consumers.push_back( WrapperFrontendAction::CreateASTConsumer( CI, InFile ) );
+        
+        return llvm::make_unique< MultiplexConsumer >( std::move( Consumers ) );
+    }
     
-    virtual void EndSourceFileAction();
+    //This is only called if the compilation was successful
+    virtual void EndSourceFileAction()
+    {
+        WrapperFrontendAction::EndSourceFileAction();
+        
+        eg_runFinalAnalysis();
+    }
+    
 public:
-    EGAction( CompilerInstance &CI, std::unique_ptr<FrontendAction> WrappedAction );
+    eg_action( CompilerInstance &CI, std::unique_ptr< FrontendAction > WrappedAction )
+    :   WrapperFrontendAction( std::move( WrappedAction ) )
+    {
+    }
     
-private:
-    //std::shared_ptr< EGDatabase > m_pEGDatabase;
 };
-    
-    
+
 } // end namespace clang_eg
 
 }  // end namespace clang

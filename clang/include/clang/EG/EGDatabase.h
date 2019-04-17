@@ -1,44 +1,39 @@
 
 
-#ifndef LLVM_CLANG_EG_DATABASE
-#define LLVM_CLANG_EG_DATABASE
+#ifndef LLVM_CLANG_EG_DATABASE_API
+#define LLVM_CLANG_EG_DATABASE_API
 
-#include "clang/AST/Type.h"
-
-namespace clang {
-
-namespace clang_eg {
-
-/*
-class EGDatabase
+namespace clang 
 {
-public:
-    virtual ~EGDatabase();
-    //virtual void setASTContext( ASTContext* pASTContext ) = 0;
-    //virtual void setSema( Sema* pSema ) = 0;
-    //virtual bool isEGType( QualType type ) = 0;
-    //virtual bool isEGTraversalType( QualType type ) = 0;
-    //virtual QualType getInvocationResultType( QualType contextType, QualType typePath, QualType operationType ) = 0;
-    //virtual QualType invokeOperationType( QualType traversal, bool bHasParameters ) = 0;
-    //
-    //virtual void runAnalysis() = 0;
-};
-*/
+    class ASTContext;
+    class Sema;
+    class QualType;
+    class Token;
 
+    namespace clang_eg 
+    {
+        void eg_initialise( ASTContext* pASTContext, Sema* pSema );
+        void eg_initialiseMode_Interface( const char* strDatabasePath );
+        void eg_initialiseMode_Operations( const char* strDatabasePath, 
+            const char* strTranslationUnitDatabasePath, unsigned uiTranslationUnitID );
+        void eg_initialiseMode_Implementation();
+        void eg_runFinalAnalysis();
 
-const char* getTypePathString();
-const char* getInvocationString();
-const char* getVariantString();
-const char* getInvokeString();
+        const char* eg_getTypePathString();
+        const char* eg_getInvocationString();
+        const char* eg_getVariantString();
+        const char* eg_getInvokeString();
+        const char* eg_getResultTypeTrait();
 
-bool isTypePathsEnabled();
-bool isEGType( QualType type );
-bool isPossibleEGType( QualType type );
-bool isPossibleEGTypeIdentifier( const IdentifierInfo &II );
+        bool eg_isEGEnabled();
+        bool eg_isEGType( const QualType& type );
+        bool eg_isPossibleEGType( const QualType& type );
+        bool eg_isPossibleEGTypeIdentifier( const Token& token );
+        void eg_getInvocationOperationType( const QualType& typePathType, bool bHasArguments, QualType& operationType );
+        void eg_getInvocationResultType( const QualType& baseType, QualType& resultType );
 
-
+    }
 }
-}
 
-#endif //LLVM_CLANG_EG_DATABASE
+#endif //LLVM_CLANG_EG_DATABASE_API
 

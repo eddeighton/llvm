@@ -1743,22 +1743,22 @@ public:
   //EG BEGIN
   IdentifierInfo *getEGTypePathName() const {
       if(!EGTypePathName)
-          EGTypePathName = &Idents.get( clang_eg::getTypePathString() );
+          EGTypePathName = &Idents.get( clang_eg::eg_getTypePathString() );
       return EGTypePathName;
   }
   IdentifierInfo *getEGInvocationTypeName() const {
       if(!EGInvocationTypeName)
-          EGInvocationTypeName = &Idents.get( clang_eg::getInvocationString() );
+          EGInvocationTypeName = &Idents.get( clang_eg::eg_getInvocationString() );
       return EGInvocationTypeName;
   }  
   IdentifierInfo *getEGVariantName() const {
       if(!EGVariantName)
-          EGVariantName = &Idents.get( clang_eg::getVariantString() );
+          EGVariantName = &Idents.get( clang_eg::eg_getVariantString() );
       return EGVariantName;
   }
   IdentifierInfo *getEGInvokeName() const {
       if(!EGInvokeName)
-          EGInvokeName = &Idents.get( clang_eg::getInvokeString() );
+          EGInvokeName = &Idents.get( clang_eg::eg_getInvokeString() );
       return EGInvokeName;
   }
   //EG END

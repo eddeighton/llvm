@@ -22,6 +22,7 @@ add_clang_library(clangIncludeFixer
   clangTooling
   clangToolingCore
   findAllSymbols
+  clangEG
   )
 
 add_subdirectory(plugin)

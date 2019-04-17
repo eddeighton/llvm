@@ -139,6 +139,9 @@ def ExprWithCleanups : DStmt<FullExpr>;
 def CXXTemporaryObjectExpr : DStmt<CXXConstructExpr>;
 def CXXUnresolvedConstructExpr : DStmt<Expr>;
 def CXXDependentScopeMemberExpr : DStmt<Expr>;
+//EG BEGIN
+def CXXDependentEGInvokeExpr : DStmt<Expr>;
+//EG END
 def OverloadExpr : DStmt<Expr, 1>;
 def UnresolvedLookupExpr : DStmt<OverloadExpr>;
 def UnresolvedMemberExpr : DStmt<OverloadExpr>;

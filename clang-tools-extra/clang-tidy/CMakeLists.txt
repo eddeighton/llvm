@@ -24,6 +24,7 @@ add_clang_library(clangTidy
   clangSerialization
   clangTooling
   clangToolingCore
+  clangEG
   )
 
 if(CLANG_ENABLE_STATIC_ANALYZER)

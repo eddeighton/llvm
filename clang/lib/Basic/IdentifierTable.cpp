@@ -100,8 +100,14 @@ namespace {
     KEYMODULES    = 0x100000,
     KEYCXX2A      = 0x200000,
     KEYOPENCLCXX  = 0x400000,
+//EG BEGIN
+    KEYEG         = 0x800000,
+//EG END
     KEYALLCXX = KEYCXX | KEYCXX11 | KEYCXX2A,
-    KEYALL = (0xffffff & ~KEYNOMS18 &
+    KEYALL = (0xffffff & ~KEYNOMS18 & 
+//EG BEGIN
+        ~KEYEG &
+//EG END
               ~KEYNOOPENCL) // KEYNOMS18 and KEYNOOPENCL are used to exclude.
   };
 
@@ -145,6 +151,9 @@ static KeywordStatus getKeywordStatus(const LangOptions &LangOpts,
   if (LangOpts.CoroutinesTS && (Flags & KEYCOROUTINES)) return KS_Enabled;
   if (LangOpts.ModulesTS && (Flags & KEYMODULES)) return KS_Enabled;
   if (LangOpts.CPlusPlus && (Flags & KEYALLCXX)) return KS_Future;
+//EG BEGIN
+  if (LangOpts.EG && (Flags & KEYEG)) return KS_Enabled;
+//EG END
   return KS_Disabled;
 }
 

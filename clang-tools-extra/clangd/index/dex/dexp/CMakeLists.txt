@@ -13,4 +13,5 @@ target_link_libraries(dexp
   PRIVATE
   clangBasic
   clangDaemon
+  clangEG
   )

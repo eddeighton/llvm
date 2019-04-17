@@ -17,4 +17,5 @@ target_link_libraries(LexTests
   clangLex
   clangParse
   clangSema
+  clangEG
   )

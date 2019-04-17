@@ -375,6 +375,9 @@ bool Declarator::isDeclarationOfFunction() const {
       return false;
 
     case TST_underlyingType:
+//EG BEGIN
+    case TST_egResultType:
+//EG END
     case TST_typename:
     case TST_typeofType: {
       QualType QT = DS.getRepAsType().get();
@@ -554,6 +557,9 @@ const char *DeclSpec::getSpecifierName(DeclSpec::TST T,
   case DeclSpec::TST_decltype:    return "(decltype)";
   case DeclSpec::TST_decltype_auto: return "decltype(auto)";
   case DeclSpec::TST_underlyingType: return "__underlying_type";
+//EG BEGIN
+  case DeclSpec::TST_egResultType: return clang_eg::eg_getResultTypeTrait();
+//EG END
   case DeclSpec::TST_unknown_anytype: return "__unknown_anytype";
   case DeclSpec::TST_atomic: return "_Atomic";
 #define GENERIC_IMAGE_TYPE(ImgType, Id) \

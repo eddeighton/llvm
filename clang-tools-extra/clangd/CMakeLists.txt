@@ -103,6 +103,7 @@ add_clang_library(clangDaemon
   clangToolingCore
   clangToolingInclusions
   clangToolingRefactor
+  clangEG
   ${LLVM_PTHREAD_LIB}
   ${CLANGD_ATOMIC_LIB}
   )

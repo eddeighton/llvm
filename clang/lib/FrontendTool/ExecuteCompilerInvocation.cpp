@@ -11,7 +11,9 @@
 // minimize the impact of pulling in essentially everything else in Clang.
 //
 //===----------------------------------------------------------------------===//
-
+//EG BEGIN
+#include "clang/EG/EGActions.h"
+//EG END
 #include "clang/ARCMigrate/ARCMTActions.h"
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Config/config.h"
@@ -176,6 +178,13 @@ CreateFrontendAction(CompilerInstance &CI) {
     Act = llvm::make_unique<ASTMergeAction>(std::move(Act),
                                             FEOpts.ASTMergeFiles);
 
+//EG BEGIN
+  if( !FEOpts.EGDatabasePath.empty() )
+  {
+      Act = llvm::make_unique< clang_eg::eg_action >( CI, std::move( Act ) );
+  }
+//EG END
+  
   return Act;
 }
 

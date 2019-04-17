@@ -26,6 +26,7 @@ target_link_libraries(ASTMatchersTests
   clangFrontend
   clangSerialization
   clangTooling
+  clangEG
   )
 
 add_subdirectory(Dynamic)

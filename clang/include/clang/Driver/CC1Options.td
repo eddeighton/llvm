@@ -588,6 +588,17 @@ def compiler_options_dump : Flag<["-"], "compiler-options-dump">,
   HelpText<"Dump the compiler configuration options">;
 }
 
+//EG BEGIN
+def egdb : Joined<["-"], "egdb=">,
+  HelpText<"EG database file">;
+def egcxx : Joined<["-"], "egcxx=">,
+  HelpText<"EG to c++ file to generate">;
+def egtu : Joined<["-"], "egtu=">,
+  HelpText<"EG translation unit database file">;
+def egtuid : Joined<["-"], "egtuid=">,
+  HelpText<"EG translation unit id">;
+//EG END
+  
 def emit_llvm_uselists : Flag<["-"], "emit-llvm-uselists">,
   HelpText<"Preserve order of LLVM use-lists when serializing">;
 def no_emit_llvm_uselists : Flag<["-"], "no-emit-llvm-uselists">,

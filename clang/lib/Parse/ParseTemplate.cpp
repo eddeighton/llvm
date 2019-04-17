@@ -1371,7 +1371,7 @@ ParsedTemplateArgument Parser::ParseTemplateArgument() {
   }
 
   //EG BEGIN
-  if( clang_eg::isTypePathsEnabled() && isEGTypePathParsing() )
+  if( clang_eg::eg_isEGEnabled() && isEGTypePathParsing() )
   {
       return ParsedTemplateArgument();
   }

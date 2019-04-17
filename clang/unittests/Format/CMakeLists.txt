@@ -28,4 +28,5 @@ target_link_libraries(FormatTests
   clangFrontend
   clangRewrite
   clangToolingCore
+  clangEG
   )

@@ -1234,6 +1234,9 @@ CanThrowResult Sema::canThrow(const Expr *E) {
 
     // Some expressions are always dependent.
   case Expr::CXXDependentScopeMemberExprClass:
+//EG BEGIN
+  case Expr::CXXDependentEGInvokeExprClass:
+//EG END
   case Expr::CXXUnresolvedConstructExprClass:
   case Expr::DependentScopeDeclRefExprClass:
   case Expr::CXXFoldExprClass:

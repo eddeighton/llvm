@@ -2,15 +2,15 @@ set(LLVM_LINK_COMPONENTS
   Support
   )
   
+#add_definitions(-DENABLE_EG_LANGUAGE -D_ENABLE_EG_LANGUAGE)
   
 find_library( EG_DATABASE_LIB_DEBUG egdatabased.lib  )
 find_library( EG_DATABASE_LIB_RELEASE egdatabase.lib  )
     
-find_path( EG_DATABASE_API NAMES egdb_export.hpp )
+find_path( EG_DATABASE_API NAMES database.hpp )
 include_directories( ${EG_DATABASE_API} )
 
 add_clang_library(clangEG
-  EGActions.cpp
   EGDatabase.cpp
 
   LINK_LIBS

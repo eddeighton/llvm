@@ -15,4 +15,5 @@ target_link_libraries(ClangDriverTests
   PRIVATE
   clangDriver
   clangBasic
+  clangEG
   )

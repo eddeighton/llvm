@@ -15,6 +15,7 @@ target_link_libraries(clang-extdef-mapping
   clangFrontend
   clangSerialization
   clangTooling
+  clangEG
   )
 
 install(TARGETS clang-extdef-mapping

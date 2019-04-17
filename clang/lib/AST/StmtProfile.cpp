@@ -1778,7 +1778,21 @@ void StmtProfiler::VisitCXXDependentScopeMemberExpr(
   if (S->hasExplicitTemplateArgs())
     VisitTemplateArguments(S->getTemplateArgs(), S->getNumTemplateArgs());
 }
-
+//EG BEGIN
+void StmtProfiler::VisitCXXDependentEGInvokeExpr(
+    const CXXDependentEGInvokeExpr *S) {
+  ID.AddBoolean(S->isImplicitAccess());
+  if (!S->isImplicitAccess()) {
+    VisitExpr(S);
+    ID.AddBoolean(S->isArrow());
+  }
+  VisitNestedNameSpecifier(S->getQualifier());
+  VisitName(S->getMember());
+  ID.AddBoolean(S->hasExplicitTemplateArgs());
+  if (S->hasExplicitTemplateArgs())
+    VisitTemplateArguments(S->getTemplateArgs(), S->getNumTemplateArgs());
+}
+//EG END
 void StmtProfiler::VisitUnresolvedMemberExpr(const UnresolvedMemberExpr *S) {
   ID.AddBoolean(S->isImplicitAccess());
   if (!S->isImplicitAccess()) {

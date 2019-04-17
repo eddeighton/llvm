@@ -286,6 +286,9 @@ protected:
     friend class CallExpr; // ctor
     friend class CXXConstructExpr; // ctor
     friend class CXXDependentScopeMemberExpr; // ctor
+//EG BEGIN
+    friend class CXXDependentEGInvokeExpr; // ctor
+//EG END
     friend class CXXNewExpr; // ctor
     friend class CXXUnresolvedConstructExpr; // ctor
     friend class DeclRefExpr; // computeDependence
@@ -311,8 +314,13 @@ protected:
     unsigned ValueDependent : 1;
     unsigned InstantiationDependent : 1;
     unsigned ContainsUnexpandedParameterPack : 1;
+//EG BEGIN
+    unsigned IsEGInvocationViaDependantExpr : 1;
+//EG END
   };
-  enum { NumExprBits = NumStmtBits + 9 };
+//EG BEGIN
+  enum { NumExprBits = NumStmtBits + 10 };
+//EG END
 
   class PredefinedExprBitfields {
     friend class ASTStmtReader;

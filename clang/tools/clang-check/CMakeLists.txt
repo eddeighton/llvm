@@ -18,6 +18,7 @@ target_link_libraries(clang-check
   clangSerialization
   clangStaticAnalyzerFrontend
   clangTooling
+  clangEG
   )
 
 install(TARGETS clang-check

@@ -1001,6 +1001,15 @@ void TypePrinter::printUnaryTransformBefore(const UnaryTransformType *T,
       OS << ')';
       spaceBeforePlaceHolder(OS);
       return;
+//EG BEGIN
+    case UnaryTransformType::EGResultType:
+      OS << clang_eg::eg_getResultTypeTrait() << "(";
+      print(T->getBaseType(), OS, StringRef());
+      OS << ')';
+      spaceBeforePlaceHolder(OS);
+      return;
+//EG END
+  
   }
 
   printBefore(T->getBaseType(), OS);
@@ -1013,6 +1022,10 @@ void TypePrinter::printUnaryTransformAfter(const UnaryTransformType *T,
   switch (T->getUTTKind()) {
     case UnaryTransformType::EnumUnderlyingType:
       return;
+//EG BEGIN
+    case UnaryTransformType::EGResultType:
+      return;
+//EG END
   }
 
   printAfter(T->getBaseType(), OS);

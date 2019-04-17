@@ -25,6 +25,7 @@ add_clang_library(clangDoc
   clangLex
   clangTooling
   clangToolingCore
+  clangEG
   )
 
 add_subdirectory(tool)

@@ -162,6 +162,9 @@ public:
     CUDA,
     RenderScript,
     HIP,
+//EG BEGIN
+    EG_CXX,
+//EG END
     ///@}
   };
 
@@ -434,6 +437,20 @@ public:
 
   /// Filename to write statistics to.
   std::string StatsFile;
+  
+//EG BEGIN
+  /// EG Database File
+  std::string EGDatabasePath;
+  
+  /// EG C++ File to generate
+  std::string EGCXXFile;
+  
+  /// EG Translation Unit Database File
+  std::string EGTranslationUnitDatabasePath;
+  
+  /// EG Translation Unit ID
+  unsigned EGTranslationUnitID;
+//EG END
 
 public:
   FrontendOptions()

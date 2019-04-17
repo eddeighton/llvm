@@ -11,6 +11,7 @@ add_clang_library(clangApplyReplacements
   clangRewrite
   clangToolingCore
   clangToolingRefactor
+  clangEG
   )
 
 include_directories(

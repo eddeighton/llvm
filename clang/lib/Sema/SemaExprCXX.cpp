@@ -1333,6 +1333,71 @@ Sema::ActOnCXXTypeConstructExpr(ParsedType TypeRep,
   return Result;
 }
 
+//EG BEGIN
+ExprResult
+Sema::BuildEgThisInvocationExpr( TypeSourceInfo *TInfo,
+                             SourceLocation LParenOrBraceLoc,
+                             MultiExprArg exprs,
+                             SourceLocation RParenOrBraceLoc )
+{
+    QualType ThisTy = getCurrentThisType();
+    SourceLocation Loc = TInfo->getTypeLoc().getBeginLoc();
+    Expr* Base = new ( Context ) CXXThisExpr( Loc, ThisTy, /*isImplicit=*/true );
+
+    CXXScopeSpec SS;
+    return BuildEgInvocationExpr( Base, nullptr, SS, true, 
+        TInfo, LParenOrBraceLoc, exprs, RParenOrBraceLoc );
+}
+
+ExprResult
+Sema::BuildEgInvocationExpr( Expr* Base, 
+                             Scope *S,
+                             CXXScopeSpec& SS,
+                             bool isPtr,
+                             TypeSourceInfo *TInfo,
+                             SourceLocation LParenOrBraceLoc,
+                             MultiExprArg exprs,
+                             SourceLocation RParenOrBraceLoc )
+{
+    QualType Ty = TInfo->getType();
+    SourceLocation Loc = TInfo->getTypeLoc().getBeginLoc();
+    assert( !Ty->isDependentType() );
+
+    //determine the operation type...
+    TemplateArgumentListInfo templateArgs( Loc, Loc );
+    {
+        templateArgs.addArgument(
+            getTrivialTemplateArgumentLoc(
+                TemplateArgument( Ty ), QualType(), Loc ) );
+
+        const bool bHasArguments = ( exprs.size() > 0U );
+            
+        QualType operationType;
+        clang_eg::eg_getInvocationOperationType( 
+            Ty, bHasArguments, operationType );
+                
+        templateArgs.addArgument(
+            getTrivialTemplateArgumentLoc(
+                TemplateArgument( operationType ), QualType(), Loc ) );
+    }
+
+    DeclarationNameInfo NameInfo( Context.getEGInvokeName(), Loc );
+
+    ExprResult Result = BuildMemberReferenceExpr(
+        Base, Base->getType(), Loc, isPtr, SS,
+        SourceLocation(), nullptr, NameInfo, &templateArgs, S );
+
+    Expr *ExecConfig = nullptr;
+    Result = ActOnCallExpr( getCurScope(), Result.get(),
+                            LParenOrBraceLoc, exprs, RParenOrBraceLoc,
+                            ExecConfig );
+
+    return Result;
+}
+//EG END
+
+
+
 ExprResult
 Sema::BuildCXXTypeConstructExpr(TypeSourceInfo *TInfo,
                                 SourceLocation LParenOrBraceLoc,
@@ -1351,7 +1416,15 @@ Sema::BuildCXXTypeConstructExpr(TypeSourceInfo *TInfo,
     return CXXUnresolvedConstructExpr::Create(Context, TInfo, Locs.getBegin(),
                                               Exprs, Locs.getEnd());
   }
-
+//EG BEGIN
+  if( clang_eg::eg_isEGEnabled() && clang_eg::eg_isEGType( Ty ) )
+  {
+      return BuildEgThisInvocationExpr( TInfo,
+                                    LParenOrBraceLoc,
+                                    Exprs,
+                                    RParenOrBraceLoc );
+  }
+//EG END
   assert((!ListInitialization ||
           (Exprs.size() == 1 && isa<InitListExpr>(Exprs[0]))) &&
          "List initialization must have initializer list as expression.");

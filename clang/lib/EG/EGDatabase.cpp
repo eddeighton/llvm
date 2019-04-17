@@ -4,58 +4,87 @@
 
 #include "database/database.hpp"
 
+#include "clang/AST/Type.h"
 
 namespace clang {
 
 namespace clang_eg {
-
-const char* getTypePathString()
-{
-    return "__eg_type_path";
-}
-const char* getInvocationString()
-{
-    return "__eg_invocation";
-}
-const char* getVariantString()
-{
-    return "__eg_variant";
-}
-const char* getInvokeString()
-{
-    return "invoke";
-}
-
-
     
-bool isTypePathsEnabled()
+void eg_initialise( ASTContext* pASTContext, Sema* pSema )
 {
-    return eg::isLanguageOptionEnabled( eg::EG_LANGUAGE_TYPE_PATHS );
+    eg::initialise( pASTContext, pSema );
 }
 
-bool isEGType( QualType type )
+void eg_initialiseMode_Interface( const char* strDatabasePath )
 {
-    return false;
+    eg::initialiseMode_Interface( strDatabasePath );
 }
 
-bool isPossibleEGType( QualType type )
+void eg_initialiseMode_Operations( const char* strDatabasePath, 
+    const char* strTranslationUnitDatabasePath, unsigned uiTranslationUnitID )
 {
-    if( !type.isNull() )
-    {
-        if( type->isDependentType() )
-        {
-            
-        }
-        else
-        {
-            
-        }
-    }
-    return isEGType( type );
+    eg::initialiseMode_Operations( strDatabasePath, strTranslationUnitDatabasePath, uiTranslationUnitID );
 }
-bool isPossibleEGTypeIdentifier( const IdentifierInfo &II )
+    
+void eg_initialiseMode_Implementation()
 {
-    return false;
+    eg::initialiseMode_Implementation();
+}
+
+void eg_runFinalAnalysis()
+{
+    eg::runFinalAnalysis();
+}
+
+const char* eg_getTypePathString()
+{
+    return eg::getTypePathString();
+}
+const char* eg_getInvocationString()
+{
+    return eg::getInvocationString();
+}
+const char* eg_getVariantString()
+{
+    return eg::getVariantString();
+}
+const char* eg_getInvokeString()
+{
+    return eg::getInvokeString();
+}
+const char* eg_getResultTypeTrait()
+{
+    return eg::getResultTypeTrait();
+}
+    
+bool eg_isEGEnabled()
+{
+    return eg::isEGEnabled();
+}
+
+bool eg_isEGType( const QualType& type )
+{
+    return eg::isEGType( type );
+}
+
+bool eg_isPossibleEGType( const QualType& type )
+{
+    return eg::isPossibleEGType( type );
+}
+
+bool eg_isPossibleEGTypeIdentifier( const Token& token )
+{
+    return eg::isPossibleEGTypeIdentifier( token );
+}
+
+void eg_getInvocationOperationType( const QualType& typePathType, bool bHasArguments, QualType& operationType )
+{
+    return eg::getInvocationOperationType( typePathType, bHasArguments, operationType );
+}
+
+void eg_getInvocationResultType( const QualType& baseType, QualType& resultType )
+{
+    return eg::getInvocationResultType( baseType, resultType );
 }
 
 }//clang_eg

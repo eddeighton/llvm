@@ -1662,6 +1662,21 @@ static InputKind ParseFrontendArgs(FrontendOptions &Opts, ArgList &Args,
     }
   }
 
+//EG BEGIN
+  //get the eg options
+  Opts.EGDatabasePath = Args.getLastArgValue( OPT_egdb );
+  Opts.EGCXXFile = Args.getLastArgValue( OPT_egcxx );
+  Opts.EGTranslationUnitDatabasePath = Args.getLastArgValue( OPT_egtu );
+  {
+      const std::string strTUID = Args.getLastArgValue( OPT_egtuid );
+      if( !strTUID.empty() )
+      {
+          //check for std::invalid_argument and std::out_of_range here
+        Opts.EGTranslationUnitID = std::stoi( strTUID );
+      }
+  }
+//EG END
+
   if (const Arg* A = Args.getLastArg(OPT_plugin)) {
     Opts.Plugins.emplace_back(A->getValue(0));
     Opts.ProgramAction = frontend::PluginAction;
@@ -1831,6 +1846,9 @@ static InputKind ParseFrontendArgs(FrontendOptions &Opts, ArgList &Args,
                 .Case("objective-c", InputKind::ObjC)
                 .Case("objective-c++", InputKind::ObjCXX)
                 .Case("renderscript", InputKind::RenderScript)
+//EG BEGIN
+                .Case("eg-cpp", InputKind::EG_CXX )
+//EG END
                 .Default(InputKind::Unknown);
 
     // "objc[++]-cpp-output" is an acceptable synonym for
@@ -2096,6 +2114,9 @@ void CompilerInvocation::setLangDefaults(LangOptions &Opts, InputKind IK,
 #endif
       break;
     case InputKind::CXX:
+//EG BEGIN
+    case InputKind::EG_CXX:
+//EG END
     case InputKind::ObjCXX:
 #if defined(CLANG_DEFAULT_STD_CXX)
       LangStd = CLANG_DEFAULT_STD_CXX;
@@ -2231,6 +2252,11 @@ static bool IsInputCompatibleWithStandard(InputKind IK,
   case InputKind::HIP:
     return S.getLanguage() == InputKind::CXX ||
            S.getLanguage() == InputKind::HIP;
+//EG BEGIN
+  case InputKind::EG_CXX:
+    return S.getLanguage() == InputKind::CXX ||
+           S.getLanguage() == InputKind::EG_CXX;
+//EG END
 
   case InputKind::Asm:
     // Accept (and ignore) all -std= values.
@@ -2261,6 +2287,10 @@ static const StringRef GetInputKindName(InputKind IK) {
     return "RenderScript";
   case InputKind::HIP:
     return "HIP";
+//EG BEGIN
+  case InputKind::EG_CXX:
+    return "EG C++";
+//EG END
 
   case InputKind::Asm:
     return "Asm";

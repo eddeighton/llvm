@@ -19,6 +19,7 @@ add_clang_library(findAllSymbols
   clangFrontend
   clangLex
   clangTooling
+  clangEG
   )
 
 add_subdirectory(tool)

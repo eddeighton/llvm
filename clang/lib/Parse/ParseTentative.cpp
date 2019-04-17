@@ -162,7 +162,11 @@ Parser::TPResult Parser::TryConsumeDeclarationSpecifier() {
     LLVM_FALLTHROUGH;
   case tok::kw_typeof:
   case tok::kw___attribute:
-  case tok::kw___underlying_type: {
+  case tok::kw___underlying_type:
+//EG BEGIN
+  case tok::kw___eg_result_type: 
+//EG END
+  {
     ConsumeToken();
     if (Tok.isNot(tok::l_paren))
       return TPResult::Error;
@@ -1118,6 +1122,9 @@ Parser::isExpressionOrTypeSpecifierSimple(tok::TokenKind Kind) {
   case tok::kw__Thread_local:
   case tok::kw_typeof:
   case tok::kw___underlying_type:
+//EG BEGIN
+  case tok::kw___eg_result_type:
+//EG END
   case tok::kw___cdecl:
   case tok::kw___stdcall:
   case tok::kw___fastcall:
@@ -1293,7 +1300,7 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
     //check for period to support period delimited eg type paths
     if (    Next.isNot(tok::coloncolon) && 
             Next.isNot(tok::less) && 
-            ( !clang_eg::isTypePathsEnabled() || Next.isNot(tok::period) )
+            ( !clang_eg::eg_isEGEnabled() || Next.isNot(tok::period) )
             ) 
     {
     //EG END
@@ -1610,28 +1617,14 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
   case tok::annot_decltype:
   
     //EG BEGIN
-    if (NextToken().is(tok::l_paren) && clang_eg::isTypePathsEnabled() && !isEGTypePathParsing() )
+    if (NextToken().is(tok::l_paren) && clang_eg::eg_isEGEnabled() && !isEGTypePathParsing() )
     {
         //if this is an eg type then always return true since it followed by l_paren
         //MUST be an eg invocation
-        
-        if( clang_eg::isPossibleEGTypeIdentifier( *Tok.getIdentifierInfo() ) )
+        if( clang_eg::eg_isPossibleEGTypeIdentifier( Tok ) )
         {
             return TPResult::False;
         }
-        
-		/*if ( Tok.getAnnotationValue() )
-		{
-            ParsedType parsedType = getTypeAnnotation( Tok );
-
-            TypeSourceInfo *TInfo;
-            QualType typeQualType = Actions.GetTypeFromParser( parsedType, &TInfo );
-
-            if( clang_eg::isEGType( typeQualType ) )
-            {
-                return TPResult::False;
-            }
-        }*/
         return TPResult::Ambiguous;
     }
     else 
@@ -1680,6 +1673,11 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
   case tok::kw___underlying_type:
     return TPResult::True;
 
+//EG BEGIN
+  case tok::kw___eg_result_type:
+    return TPResult::True;
+//EG END
+    
   // C11 _Atomic
   case tok::kw__Atomic:
     return TPResult::True;
@@ -1697,6 +1695,9 @@ bool Parser::isCXXDeclarationSpecifierAType() {
   case tok::annot_typename:
   case tok::kw_typeof:
   case tok::kw___underlying_type:
+//EG BEGIN
+  case tok::kw___eg_result_type:
+//EG END
     return true;
 
     // elaborated-type-specifier

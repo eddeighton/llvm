@@ -940,15 +940,30 @@ ExprResult Parser::ParseCastExpression(bool isUnaryExpression,
                                      NotCastExpr, isTypeCast);
         }
       }
-
-      if ((!ColonIsSacred && Next.is(tok::colon)) ||
-          Next.isOneOf(tok::coloncolon, tok::less, tok::l_paren,
-                       tok::l_brace)) {
-        // If TryAnnotateTypeOrScopeToken annotates the token, tail recurse.
-        if (TryAnnotateTypeOrScopeToken())
-          return ExprError();
-        if (!Tok.is(tok::identifier))
-          return ParseCastExpression(isUnaryExpression, isAddressOfOperand);
+//EG BEGIN
+      if( clang_eg::eg_isEGEnabled() )
+      {
+          if ((!ColonIsSacred && Next.is(tok::colon)) ||
+              Next.isOneOf(tok::coloncolon, tok::less, tok::l_paren, tok::l_brace, 
+                    tok::period)) {
+            // If TryAnnotateTypeOrScopeToken annotates the token, tail recurse.
+            if (TryAnnotateTypeOrScopeToken())
+              return ExprError();
+            if (!Tok.is(tok::identifier))
+              return ParseCastExpression(isUnaryExpression, isAddressOfOperand);
+          }
+      }
+      else
+//EG END
+      {
+          if ((!ColonIsSacred && Next.is(tok::colon)) ||
+              Next.isOneOf(tok::coloncolon, tok::less, tok::l_paren, tok::l_brace)) {
+            // If TryAnnotateTypeOrScopeToken annotates the token, tail recurse.
+            if (TryAnnotateTypeOrScopeToken())
+              return ExprError();
+            if (!Tok.is(tok::identifier))
+              return ParseCastExpression(isUnaryExpression, isAddressOfOperand);
+          }
       }
     }
 
@@ -1747,11 +1762,11 @@ Parser::ParsePostfixExpressionSuffix(ExprResult LHS) {
       
         //EG BEGIN
         bool bAllowEGTypePath = false;
-        if( clang_eg::isTypePathsEnabled() )
+        if( clang_eg::eg_isEGEnabled() )
         {
             if( !LHS.isInvalid() )
             {
-                bAllowEGTypePath = clang_eg::isPossibleEGType( LHS.get()->getType() );
+                bAllowEGTypePath = clang_eg::eg_isPossibleEGType( LHS.get()->getType() );
             }
         }
 
@@ -1801,47 +1816,212 @@ Parser::ParsePostfixExpressionSuffix(ExprResult LHS) {
                                        ObjectType);
         break;
       }
+      
+//EG BEGIN
+    //if dependent type then we do NOT know if this is an eg invocation or ordinary c++ member reference
+    if( clang_eg::eg_isEGEnabled() && 
+        !LHS.isInvalid() && 
+            LHS.get() && 
+            !LHS.get()->getType().isNull() && 
+            LHS.get()->getType()->isDependentType() &&
+            isPossibleEGInvocation() )
+    {
+          ParsedType TypeRep;
+          {
+              RevertingTentativeParsingAction revertingParse( *this );
 
-      // Either the action has told us that this cannot be a
-      // pseudo-destructor expression (based on the type of base
-      // expression), or we didn't see a '~' in the right place. We
-      // can still parse a destructor name here, but in that case it
-      // names a real destructor.
-      // Allow explicit constructor calls in Microsoft mode.
-      // FIXME: Add support for explicit call of template constructor.
-      SourceLocation TemplateKWLoc;
-      UnqualifiedId Name;
-      if (getLangOpts().ObjC && OpKind == tok::period &&
-          Tok.is(tok::kw_class)) {
-        // Objective-C++:
-        //   After a '.' in a member access expression, treat the keyword
-        //   'class' as if it were an identifier.
-        //
-        // This hack allows property access to the 'class' method because it is
-        // such a common method name. For other C++ keywords that are
-        // Objective-C method names, one must use the message send syntax.
-        IdentifierInfo *Id = Tok.getIdentifierInfo();
-        SourceLocation Loc = ConsumeToken();
-        Name.setIdentifier(Id, Loc);
-      } else if (ParseUnqualifiedId(SS,
-                                    /*EnteringContext=*/false,
-                                    /*AllowDestructorName=*/true,
-                                    /*AllowConstructorName=*/
-                                    getLangOpts().MicrosoftExt &&
-                                        SS.isNotEmpty(),
-                                    /*AllowDeductionGuide=*/false,
-                                    ObjectType, &TemplateKWLoc, Name)) {
-        (void)Actions.CorrectDelayedTyposInExpr(LHS);
-        LHS = ExprError();
+              if( Tok.is( tok::identifier ) )
+              {
+                  TryAnnotateName( false );
+              }
+
+              if( Tok.is( tok::annot_template_id ) )
+              {
+                  TemplateIdAnnotation *TemplateId = takeTemplateIdAnnotation( Tok );
+                  
+                  if( TemplateId->Kind != TNK_Type_template )
+                  {
+                      LHS = ExprError();
+                  }
+                  else 
+                  {
+                      CXXScopeSpec SS;
+                      AnnotateTemplateIdTokenAsType();
+                      if( !Tok.is( tok::annot_typename ) )
+                      {
+                          LHS = ExprError();
+                      }
+                  }
+              }
+
+              if( !LHS.isInvalid() && Tok.is( tok::annot_typename ) )
+              {
+                  DeclSpec DS( AttrFactory );
+                  ParseCXXSimpleTypeSpecifier( DS );
+
+                  Declarator DeclaratorInfo( DS, DeclaratorContext::FunctionalCastContext );
+                  TypeRep = Actions.ActOnTypeName( getCurScope(), DeclaratorInfo ).get();
+              }
+          }
+          
+          //create dependently typed eg invoke
+          SourceLocation TemplateKWLoc;
+          UnqualifiedId Name;
+          if (!LHS.isInvalid())
+          {
+              if (ParseUnqualifiedId(     SS,
+                                          /*EnteringContext=*/false,
+                                          /*AllowDestructorName=*/true,
+                                          /*AllowConstructorName=*/
+                                          getLangOpts().MicrosoftExt &&
+                                              SS.isNotEmpty(),
+                                          /*AllowDeductionGuide=*/false,
+                                          ObjectType, &TemplateKWLoc, Name )) 
+              {
+                  (void)Actions.CorrectDelayedTyposInExpr(LHS);
+                  LHS = ExprError();
+              }
+          }
+
+          if (!LHS.isInvalid())
+          {
+            LHS = Actions.ActOnAmbiguousEGInvokeMemberAccessExpr( 
+                  TypeRep,
+                  getCurScope(), LHS.get(), OpLoc,
+                  OpKind, SS, TemplateKWLoc, Name,
+                  CurParsedObjCImpl ? CurParsedObjCImpl->Dcl : nullptr);
+          }
+          if (!LHS.isInvalid() && Tok.is(tok::less))
+          {
+              checkPotentialAngleBracket(LHS);
+          }
       }
+      else if( clang_eg::eg_isEGEnabled() && 
+            !LHS.isInvalid() && 
+            LHS.get() && 
+            !LHS.get()->getType().isNull() && 
+            clang_eg::eg_isEGType( LHS.get()->getType() ) ) //handle normal eg member invoke
+      {
+            if( Tok.is( tok::identifier ) )
+            {
+                TryAnnotateName( false );
+            }
 
-      if (!LHS.isInvalid())
-        LHS = Actions.ActOnMemberAccessExpr(getCurScope(), LHS.get(), OpLoc,
-                                            OpKind, SS, TemplateKWLoc, Name,
-                                 CurParsedObjCImpl ? CurParsedObjCImpl->Dcl
-                                                   : nullptr);
-      if (!LHS.isInvalid() && Tok.is(tok::less))
-        checkPotentialAngleBracket(LHS);
+            if( Tok.is( tok::annot_template_id ) )
+            {
+                TemplateIdAnnotation *TemplateId = takeTemplateIdAnnotation( Tok );
+                if( TemplateId->Kind != TNK_Type_template )
+                {
+                    LHS = ExprError();
+                }
+                else
+                {
+                    CXXScopeSpec SS;
+                    AnnotateTemplateIdTokenAsType();
+                    if( !Tok.is( tok::annot_typename ) )
+                    {
+                        LHS = ExprError();
+                    }
+                }
+            }
+
+          if (!LHS.isInvalid())
+          {
+            if( Tok.is( tok::annot_typename ) )
+            {
+                DeclSpec DS( AttrFactory );
+                ParseCXXSimpleTypeSpecifier( DS );
+            
+                Declarator DeclaratorInfo( DS, DeclaratorContext::FunctionalCastContext );
+                ParsedType TypeRep = Actions.ActOnTypeName( getCurScope(), DeclaratorInfo ).get();
+                    
+                SourceLocation Loc = Tok.getLocation();
+
+                BalancedDelimiterTracker T( *this, tok::l_paren );
+                T.consumeOpen();
+
+                ExprVector Exprs;
+                CommaLocsTy CommaLocs;
+
+                if( Tok.isNot( tok::r_paren ) )
+                {
+                    if( ParseExpressionList( Exprs, CommaLocs, [ & ]
+                    {
+                        QualType PreferredType = Actions.ProduceConstructorSignatureHelp(
+                            getCurScope(), TypeRep.get()->getCanonicalTypeInternal(),
+                            DS.getEndLoc(), Exprs, T.getOpenLocation() );
+                        CalledSignatureHelp = true;
+                        Actions.CodeCompleteExpression( getCurScope(), PreferredType );
+                    } ) )
+                    {
+                        if( PP.isCodeCompletionReached() && !CalledSignatureHelp )
+                        {
+                            Actions.ProduceConstructorSignatureHelp(
+                                getCurScope(), TypeRep.get()->getCanonicalTypeInternal(),
+                                DS.getEndLoc(), Exprs, T.getOpenLocation() );
+                            CalledSignatureHelp = true;
+                        }
+                        SkipUntil( tok::r_paren, StopAtSemi );
+                        return ExprError();
+                    }
+                }
+                T.consumeClose();
+                
+                LHS = Actions.ActOnEgMemberInvocation( 
+                                    getCurScope(), LHS.get(), SS, TypeRep,
+                                    OpKind == tok::arrow, 
+                                    T.getOpenLocation(), Exprs, T.getCloseLocation() );  
+            }
+            else
+            {
+                LHS = ExprError();
+            }   
+          }
+      }
+      else //handle normal c++ member access expr
+      {
+//EG END
+          // Either the action has told us that this cannot be a
+          // pseudo-destructor expression (based on the type of base
+          // expression), or we didn't see a '~' in the right place. We
+          // can still parse a destructor name here, but in that case it
+          // names a real destructor.
+          // Allow explicit constructor calls in Microsoft mode.
+          // FIXME: Add support for explicit call of template constructor.
+          SourceLocation TemplateKWLoc;
+          UnqualifiedId Name;
+          if (getLangOpts().ObjC && OpKind == tok::period &&
+              Tok.is(tok::kw_class)) {
+            // Objective-C++:
+            //   After a '.' in a member access expression, treat the keyword
+            //   'class' as if it were an identifier.
+            //
+            // This hack allows property access to the 'class' method because it is
+            // such a common method name. For other C++ keywords that are
+            // Objective-C method names, one must use the message send syntax.
+            IdentifierInfo *Id = Tok.getIdentifierInfo();
+            SourceLocation Loc = ConsumeToken();
+            Name.setIdentifier(Id, Loc);
+          } else if (ParseUnqualifiedId(SS,
+                                        /*EnteringContext=*/false,
+                                        /*AllowDestructorName=*/true,
+                                        /*AllowConstructorName=*/
+                                        getLangOpts().MicrosoftExt &&
+                                            SS.isNotEmpty(),
+                                        /*AllowDeductionGuide=*/false,
+                                        ObjectType, &TemplateKWLoc, Name)) {
+            (void)Actions.CorrectDelayedTyposInExpr(LHS);
+            LHS = ExprError();
+          }
+
+          if (!LHS.isInvalid())
+            LHS = Actions.ActOnMemberAccessExpr(getCurScope(), LHS.get(), OpLoc,
+                                                OpKind, SS, TemplateKWLoc, Name,
+                                     CurParsedObjCImpl ? CurParsedObjCImpl->Dcl
+                                                       : nullptr);
+          if (!LHS.isInvalid() && Tok.is(tok::less))
+            checkPotentialAngleBracket(LHS);
+      }
       break;
     }
     case tok::plusplus:    // postfix-expression: postfix-expression '++'

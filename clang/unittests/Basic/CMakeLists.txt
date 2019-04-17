@@ -16,4 +16,5 @@ target_link_libraries(BasicTests
   clangAST
   clangBasic
   clangLex
+  clangEG
   )

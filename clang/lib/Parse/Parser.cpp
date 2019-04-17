@@ -47,7 +47,7 @@ Parser::EGTypePathParsingAction::EGTypePathParsingAction( Parser& p )
         m_parser( p ),
         m_bActive( true )
 {
-    assert( clang_eg::isTypePathsEnabled() && "EG Type Paths not enabled while using EGTypePathParsingAction" );
+    assert( clang_eg::eg_isEGEnabled() && "EG Type Paths not enabled while using EGTypePathParsingAction" );
     m_parser.EGTypePathParsingStack.push_back( this );
 }
 
@@ -87,7 +87,7 @@ Parser::EGTypePathParsingNestingAction::~EGTypePathParsingNestingAction()
 
 bool Parser::isEGTypePathParsing() const
 {
-  if( clang_eg::isTypePathsEnabled() )
+  if( clang_eg::eg_isEGEnabled() )
   {
       if( EGTypePathParsingStack.empty() )
       {

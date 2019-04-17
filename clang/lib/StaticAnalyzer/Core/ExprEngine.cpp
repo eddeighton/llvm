@@ -1157,6 +1157,9 @@ void ExprEngine::Visit(const Stmt *S, ExplodedNode *Pred,
     // C++, OpenMP and ARC stuff we don't support yet.
     case Expr::ObjCIndirectCopyRestoreExprClass:
     case Stmt::CXXDependentScopeMemberExprClass:
+//EG BEGIN
+    case Stmt::CXXDependentEGInvokeExprClass:
+//EG END
     case Stmt::CXXInheritedCtorInitExprClass:
     case Stmt::CXXTryStmtClass:
     case Stmt::CXXTypeidExprClass:

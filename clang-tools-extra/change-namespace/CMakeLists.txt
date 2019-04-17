@@ -15,6 +15,7 @@ add_clang_library(clangChangeNamespace
   clangSerialization
   clangTooling
   clangToolingCore
+  clangEG
   )
 
 add_subdirectory(tool)

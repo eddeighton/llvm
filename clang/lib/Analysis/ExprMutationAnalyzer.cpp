@@ -211,7 +211,12 @@ const Stmt *ExprMutationAnalyzer::findDirectMutation(const Expr *Exp) {
                  callExpr(callee(expr(anyOf(
                      unresolvedMemberExpr(hasObjectExpression(equalsNode(Exp))),
                      cxxDependentScopeMemberExpr(
-                         hasObjectExpression(equalsNode(Exp)))))))));
+                         hasObjectExpression(equalsNode(Exp)))  
+//EG BEGIN
+                    ,cxxDependentEGInvokeExpr(
+                         hasObjectExpression(equalsNode(Exp))) 
+//EG END
+                                ))))));
 
   // Taking address of 'Exp'.
   // We're assuming 'Exp' is mutated as soon as its address is taken, though in
@@ -247,6 +252,9 @@ const Stmt *ExprMutationAnalyzer::findDirectMutation(const Expr *Exp) {
       cxxConstructExpr(NonConstRefParam, NotInstantiated),
       callExpr(callee(expr(anyOf(unresolvedLookupExpr(), unresolvedMemberExpr(),
                                  cxxDependentScopeMemberExpr(),
+//EG BEGIN
+                                 cxxDependentEGInvokeExpr(),
+//EG END
                                  hasType(templateTypeParmType())))),
                hasAnyArgument(equalsNode(Exp))),
       cxxUnresolvedConstructExpr(hasAnyArgument(equalsNode(Exp))));
@@ -279,7 +287,12 @@ const Stmt *ExprMutationAnalyzer::findMemberMutation(const Expr *Exp) {
   const auto MemberExprs =
       match(findAll(expr(anyOf(memberExpr(hasObjectExpression(equalsNode(Exp))),
                                cxxDependentScopeMemberExpr(
-                                   hasObjectExpression(equalsNode(Exp)))))
+                                   hasObjectExpression(equalsNode(Exp))) 
+//EG BEGIN
+                              ,cxxDependentEGInvokeExpr( 
+                                   hasObjectExpression(equalsNode(Exp)))
+//EG END
+                                   ))
                         .bind(NodeID<Expr>::value)),
             Stm, Context);
   return findExprMutation(MemberExprs);

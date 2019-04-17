@@ -156,7 +156,7 @@ bool Parser::ParseOptionalCXXScopeSpecifier(CXXScopeSpec &SS,
          "Call sites of this function should be guarded by checking for C++");
          
   //EG BEGIN
-  if( clang_eg::isTypePathsEnabled() && AllowEGTypePath )
+  if( clang_eg::eg_isEGEnabled() && AllowEGTypePath )
   {
       if( ParsePossibleEGTypePath( SS, ObjectType, EnteringContext, 
                 MayBePseudoDestructor, IsTypename, LastII, OnlyNamespace ) )
@@ -564,7 +564,7 @@ bool Parser::isPossibleEGTypePath()
 {
     bool bIsPossible = false;
     
-    assert( clang_eg::isTypePathsEnabled() && "isPossibleEGTypePath called when type paths not enabled" );
+    assert( clang_eg::eg_isEGEnabled() && "isPossibleEGTypePath called when EG not enabled" );
 
     RevertingTentativeParsingAction revertingParse( *this );
 
@@ -577,7 +577,7 @@ bool Parser::isPossibleEGTypePath()
         switch( state )
         {
             case 0:
-                if( clang_eg::isPossibleEGTypeIdentifier( *Tok.getIdentifierInfo() ) )
+                if( clang_eg::eg_isPossibleEGTypeIdentifier( Tok ) )
                 {
                     if( Tok.is( tok::identifier ) )
                     {
@@ -666,10 +666,12 @@ bool Parser::isPossibleEGTypePath()
 
     return bIsPossible;
 }
-/*
+
 bool Parser::isPossibleEGInvocation()
 {
     bool bIsPossible = false;
+    
+    assert( clang_eg::eg_isEGEnabled() && "isPossibleEGInvocation called when EG not enabled" );
     
     RevertingTentativeParsingAction revertingParse( *this );
     
@@ -681,19 +683,27 @@ bool Parser::isPossibleEGInvocation()
         switch( state )
         {
             case 0:
-                if( Tok.is( tok::identifier ) )
+                if( clang_eg::eg_isPossibleEGTypeIdentifier( Tok ) )
                 {
-                    state = 1;
-                    ConsumeToken();
-                }
-                else if( Tok.is( tok::annot_typename ) ||
-                         Tok.is( tok::annot_template_id ) )
-                {
-                    state = 1;
-                    ConsumeAnnotationToken();
+                    if( Tok.is( tok::identifier ) )
+                    {
+                        state = 1;
+                        ConsumeToken();
+                    }
+                    else if( Tok.is( tok::annot_typename ) ||
+                             Tok.is( tok::annot_template_id ) )
+                    {
+                        state = 1;
+                        ConsumeAnnotationToken();
+                    }
+                    else
+                    {
+                        bContinue = false;
+                    }
                 }
                 else
                 {
+                    bIsPossible = false;
                     bContinue = false;
                 }
                 break;
@@ -750,7 +760,7 @@ bool Parser::isPossibleEGInvocation()
     }
     
     return bIsPossible;
-}*/
+}
 
 bool Parser::ParsePossibleEGTypePath( CXXScopeSpec &SS,
                                      ParsedType ObjectType,
@@ -761,7 +771,7 @@ bool Parser::ParsePossibleEGTypePath( CXXScopeSpec &SS,
                                      bool OnlyNamespace )
 {
     //look ahead and determine if this is a type sequence 
-    if( clang_eg::isTypePathsEnabled() && !isEGTypePathParsing() && isPossibleEGTypePath() )
+    if( clang_eg::eg_isEGEnabled() && !isEGTypePathParsing() && isPossibleEGTypePath() )
     {
         if( AnnotateTypePathTemplateIdToken( SS, ObjectType, EnteringContext, true ) )
         {

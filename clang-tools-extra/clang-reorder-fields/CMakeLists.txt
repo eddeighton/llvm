@@ -11,6 +11,7 @@ add_clang_library(clangReorderFields
   clangLex
   clangSerialization
   clangToolingCore
+  clangEG
   )
 
 add_subdirectory(tool)
