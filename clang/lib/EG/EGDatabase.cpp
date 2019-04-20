@@ -2,7 +2,7 @@
 
 #include "clang/EG/EGDatabase.h"
 
-#include "database/database.hpp"
+#include "clang_plugin/clang_plugin.hpp"
 
 #include "clang/AST/Type.h"
 
@@ -75,6 +75,11 @@ bool eg_isPossibleEGType( const QualType& type )
 bool eg_isPossibleEGTypeIdentifier( const Token& token )
 {
     return eg::isPossibleEGTypeIdentifier( token );
+}
+
+int eg_isPossibleEGTypeIdentifierDecl( const Token& token, bool bIsTypePathParsing )
+{
+    return eg::isPossibleEGTypeIdentifierDecl( token, bIsTypePathParsing );
 }
 
 void eg_getInvocationOperationType( const QualType& typePathType, bool bHasArguments, QualType& operationType )

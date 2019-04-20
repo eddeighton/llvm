@@ -2,13 +2,11 @@ set(LLVM_LINK_COMPONENTS
   Support
   )
   
-#add_definitions(-DENABLE_EG_LANGUAGE -D_ENABLE_EG_LANGUAGE)
-  
-find_library( EG_DATABASE_LIB_DEBUG egdatabased.lib  )
-find_library( EG_DATABASE_LIB_RELEASE egdatabase.lib  )
+find_library( EG_PLUGIN_LIB_DEBUG eg_clang_plugind.lib  )
+find_library( EG_PLUGIN_LIB_RELEASE eg_clang_plugin.lib  )
     
-find_path( EG_DATABASE_API NAMES database.hpp )
-include_directories( ${EG_DATABASE_API} )
+find_path( EG_API_DIR NAMES clang_plugin/clang_plugin.hpp )
+include_directories( ${EG_API_DIR} )
 
 add_clang_library(clangEG
   EGDatabase.cpp
@@ -27,4 +25,4 @@ add_clang_library(clangEG
   clangStaticAnalyzerCore
   )
 
-target_link_libraries( clangEG LINK_PRIVATE debug ${EG_DATABASE_LIB_DEBUG} optimized ${EG_DATABASE_LIB_RELEASE} )
+target_link_libraries( clangEG LINK_PRIVATE debug ${EG_PLUGIN_LIB_DEBUG} optimized ${EG_PLUGIN_LIB_RELEASE} )

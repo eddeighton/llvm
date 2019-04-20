@@ -29,6 +29,7 @@ namespace clang
         bool eg_isEGType( const QualType& type );
         bool eg_isPossibleEGType( const QualType& type );
         bool eg_isPossibleEGTypeIdentifier( const Token& token );
+        int eg_isPossibleEGTypeIdentifierDecl( const Token& token, bool bIsTypePathParsing );
         void eg_getInvocationOperationType( const QualType& typePathType, bool bHasArguments, QualType& operationType );
         void eg_getInvocationResultType( const QualType& baseType, QualType& resultType );
 

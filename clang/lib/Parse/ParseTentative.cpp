@@ -1617,15 +1617,17 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
   case tok::annot_decltype:
   
     //EG BEGIN
-    if (NextToken().is(tok::l_paren) && clang_eg::eg_isEGEnabled() && !isEGTypePathParsing() )
+    if (NextToken().is(tok::l_paren) && clang_eg::eg_isEGEnabled() )
     {
         //if this is an eg type then always return true since it followed by l_paren
         //MUST be an eg invocation
-        if( clang_eg::eg_isPossibleEGTypeIdentifier( Tok ) )
+        switch( clang_eg::eg_isPossibleEGTypeIdentifierDecl( Tok, isEGTypePathParsing() ) )
         {
-            return TPResult::False;
+            case 0: return TPResult::False;
+            case 1: return TPResult::True;
+            case 2: 
+            default:return TPResult::Ambiguous;
         }
-        return TPResult::Ambiguous;
     }
     else 
     //EG END
