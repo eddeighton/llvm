@@ -1254,5 +1254,12 @@ let CategoryName = "Coroutines Issue" in {
 def err_for_co_await_not_range_for : Error<
   "'co_await' modifier can only be applied to range-based for loop">;
 }
-
+//EG BEGIN
+let CategoryName = "EG Issue" in {
+def err_eg_generic_error : Error<
+  "EG error: '%0'">;
+def warn_eg_generic_warning : Warning<
+  "EG warning: '%0'">;
+}
+//EG END
 } // end of Parser diagnostics

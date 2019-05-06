@@ -9,6 +9,7 @@ namespace clang
     class Sema;
     class QualType;
     class Token;
+    class SourceLocation;
 
     namespace clang_eg 
     {
@@ -30,8 +31,8 @@ namespace clang
         bool eg_isPossibleEGType( const QualType& type );
         bool eg_isPossibleEGTypeIdentifier( const Token& token );
         int eg_isPossibleEGTypeIdentifierDecl( const Token& token, bool bIsTypePathParsing );
-        void eg_getInvocationOperationType( const QualType& typePathType, bool bHasArguments, QualType& operationType );
-        void eg_getInvocationResultType( const QualType& baseType, QualType& resultType );
+        bool eg_getInvocationOperationType( const SourceLocation& loc, const QualType& typePathType, bool bHasArguments, QualType& operationType );
+        bool eg_getInvocationResultType( const SourceLocation& loc, const QualType& baseType, QualType& resultType );
 
     }
 }

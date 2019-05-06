@@ -1373,8 +1373,11 @@ Sema::BuildEgInvocationExpr( Expr* Base,
         const bool bHasArguments = ( exprs.size() > 0U );
             
         QualType operationType;
-        clang_eg::eg_getInvocationOperationType( 
-            Ty, bHasArguments, operationType );
+        if( !clang_eg::eg_getInvocationOperationType( Base->getExprLoc(),
+            Ty, bHasArguments, operationType ) )
+        {
+            return ExprError();
+        }
                 
         templateArgs.addArgument(
             getTrivialTemplateArgumentLoc(
@@ -1387,11 +1390,15 @@ Sema::BuildEgInvocationExpr( Expr* Base,
         Base, Base->getType(), Loc, isPtr, SS,
         SourceLocation(), nullptr, NameInfo, &templateArgs, S );
 
+    const int iInvokeLocHandle = eg_pushInvokeLocation( Base->getExprLoc() );
+        
     Expr *ExecConfig = nullptr;
     Result = ActOnCallExpr( getCurScope(), Result.get(),
                             LParenOrBraceLoc, exprs, RParenOrBraceLoc,
                             ExecConfig );
 
+    eg_popInvokeLocation( iInvokeLocHandle );
+                            
     return Result;
 }
 //EG END

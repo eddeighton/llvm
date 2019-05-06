@@ -11516,8 +11516,11 @@ TreeTransform<Derived>::TransformCXXDependentEGInvokeExpr(
                 const bool bHasArguments = ( E->getRootCallExpr()->getNumArgs() > 0U );
                 
                 QualType operationType;
-                clang_eg::eg_getInvocationOperationType( 
-                    typePathType, bHasArguments, operationType );
+                if( !clang_eg::eg_getInvocationOperationType( ((Expr*) Base.get())->getExprLoc(),
+                    typePathType, bHasArguments, operationType ) )
+                {
+                    return ExprError();
+                }
         
                 templateArgs.addArgument(
                     SemaRef.getTrivialTemplateArgumentLoc(

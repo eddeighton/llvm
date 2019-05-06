@@ -1885,11 +1885,13 @@ Parser::ParsePostfixExpressionSuffix(ExprResult LHS) {
 
           if (!LHS.isInvalid())
           {
+            const int iInvokeLocHandle = Actions.eg_pushInvokeLocation( OpLoc );
             LHS = Actions.ActOnAmbiguousEGInvokeMemberAccessExpr( 
                   TypeRep,
                   getCurScope(), LHS.get(), OpLoc,
                   OpKind, SS, TemplateKWLoc, Name,
                   CurParsedObjCImpl ? CurParsedObjCImpl->Dcl : nullptr);
+            Actions.eg_popInvokeLocation( iInvokeLocHandle );
           }
           if (!LHS.isInvalid() && Tok.is(tok::less))
           {
@@ -1967,10 +1969,12 @@ Parser::ParsePostfixExpressionSuffix(ExprResult LHS) {
                 }
                 T.consumeClose();
                 
+                const int iInvokeLocHandle = Actions.eg_pushInvokeLocation( OpLoc );
                 LHS = Actions.ActOnEgMemberInvocation( 
                                     getCurScope(), LHS.get(), SS, TypeRep,
                                     OpKind == tok::arrow, 
                                     T.getOpenLocation(), Exprs, T.getCloseLocation() );  
+                Actions.eg_popInvokeLocation( iInvokeLocHandle );
             }
             else
             {

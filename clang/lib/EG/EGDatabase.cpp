@@ -82,14 +82,14 @@ int eg_isPossibleEGTypeIdentifierDecl( const Token& token, bool bIsTypePathParsi
     return eg::isPossibleEGTypeIdentifierDecl( token, bIsTypePathParsing );
 }
 
-void eg_getInvocationOperationType( const QualType& typePathType, bool bHasArguments, QualType& operationType )
+bool eg_getInvocationOperationType( const SourceLocation& loc, const QualType& typePathType, bool bHasArguments, QualType& operationType )
 {
-    return eg::getInvocationOperationType( typePathType, bHasArguments, operationType );
+    return eg::getInvocationOperationType( loc, typePathType, bHasArguments, operationType );
 }
 
-void eg_getInvocationResultType( const QualType& baseType, QualType& resultType )
+bool eg_getInvocationResultType( const SourceLocation& loc, const QualType& baseType, QualType& resultType )
 {
-    return eg::getInvocationResultType( baseType, resultType );
+    return eg::getInvocationResultType( loc, baseType, resultType );
 }
 
 }//clang_eg

@@ -4381,6 +4381,13 @@ public:
                                    Decl *ObjCImpDecl);
 
 //EG BEGIN
+  bool eg_getInvokeLocation( SourceLocation& loc );
+  int eg_pushInvokeLocation( SourceLocation loc );
+  void eg_popInvokeLocation( int iHandle );
+private:
+  std::vector< SourceLocation > eg_invokeLocations;
+public:
+
   ExprResult ActOnEgMemberInvocation(Scope *S, Expr *Base,
                                         CXXScopeSpec &SS,
                                        ParsedType TypeRep,

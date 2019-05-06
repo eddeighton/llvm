@@ -1736,7 +1736,32 @@ ExprResult Sema::ActOnAmbiguousEGInvokeMemberAccessExpr( ParsedType typePathPars
       SS.getWithLocInContext(Context), TemplateKWLoc, FirstQualifierInScope,
       NameInfo, TemplateArgs);
 }
-              
+             
+bool Sema::eg_getInvokeLocation( SourceLocation& loc )
+{
+    if( !eg_invokeLocations.empty() )
+    {
+        loc = eg_invokeLocations.back();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+int Sema::eg_pushInvokeLocation( SourceLocation loc )
+{
+    eg_invokeLocations.push_back( loc );
+    return eg_invokeLocations.size();
+}
+
+void Sema::eg_popInvokeLocation( int iHandle )
+{
+    assert( eg_invokeLocations.size() == iHandle );
+    eg_invokeLocations.pop_back();
+}
+  
 ExprResult Sema::ActOnEgMemberInvocation(Scope *S, Expr *Base,
                                         CXXScopeSpec &SS,
                                        ParsedType TypeRep,

@@ -1562,7 +1562,7 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
     assert(!Result.isNull() && "Didn't get a type for __eg_result_type?");
     Result = S.BuildUnaryTransformType(Result,
                                        UnaryTransformType::EGResultType,
-                                       DS.getTypeSpecTypeLoc());
+                                       DeclLoc);
     if (Result.isNull()) {
       Result = Context.IntTy;
       declarator.setInvalidType(true);
@@ -8238,7 +8238,14 @@ QualType Sema::BuildUnaryTransformType(QualType BaseType,
   case UnaryTransformType::EGResultType:
       {
           QualType resultType = BaseType;
-          clang_eg::eg_getInvocationResultType( BaseType, resultType );
+          
+          //attempt to get current invocation source loc for error reporting
+          SourceLocation invokeLocation = Loc;
+          eg_getInvokeLocation( invokeLocation );
+          
+          //ask the eg database for the return type of the invocation - this may do nothing
+          clang_eg::eg_getInvocationResultType( invokeLocation, BaseType, resultType );
+          
           return Context.getUnaryTransformType( BaseType, resultType,
                                             UnaryTransformType::EGResultType );
       }
