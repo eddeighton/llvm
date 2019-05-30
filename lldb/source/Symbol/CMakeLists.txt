@@ -38,6 +38,7 @@ add_lldb_library(lldbSymbol
     clangAST
     clangBasic
     clangFrontend
+    clangEG
     lldbCore
     lldbExpression
     lldbHost
