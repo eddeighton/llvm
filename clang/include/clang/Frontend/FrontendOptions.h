@@ -439,6 +439,9 @@ public:
   std::string StatsFile;
   
 //EG BEGIN
+  /// EG Plugin DLL File
+  std::string EGPluginDllPath;
+
   /// EG Database File
   std::string EGDatabasePath;
   

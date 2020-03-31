@@ -6,90 +6,212 @@
 
 #include "clang/AST/Type.h"
 
+#include "llvm/Support/DynamicLibrary.h"
+#include "llvm/Support/raw_ostream.h"
+
+#define PLUGIN_ERROR( msg ) \
+llvm::errs() << msg;\
+std::abort();
+
 namespace clang {
 
 namespace clang_eg {
     
+static llvm::sys::DynamicLibrary g_eg_plugin;
+
+::eg::EG_PLUGIN_INTERFACE* g_eg_plugin_interface = nullptr;
+    
+void eg_load_plugin( const char* strPluginPath )
+{
+    g_eg_plugin = llvm::sys::DynamicLibrary::getPermanentLibrary( strPluginPath );
+
+    if( !g_eg_plugin.isValid() )
+    {
+        //error
+        PLUGIN_ERROR( "Failed to load eg clang plugin dll" );
+    }
+    
+    EG_PLUGIN_INTERFACE_GETTER pGetter = 
+		static_cast< EG_PLUGIN_INTERFACE_GETTER >( g_eg_plugin.getAddressOfSymbol( "GET_EG_PLUGIN_INTERFACE" ) );
+    if( !pGetter )
+    {
+        //error
+        PLUGIN_ERROR( "Failed to get GET_EG_PLUGIN_INTERFACE symbol from eg clang plugin dll" );
+    }
+    
+    g_eg_plugin_interface = static_cast< ::eg::EG_PLUGIN_INTERFACE* >( pGetter() );
+    if( !g_eg_plugin_interface )
+    {
+        //error
+        PLUGIN_ERROR( "Failed to acquire eg clang plugin interface from dll" );
+    }
+}
+    
 void eg_initialise( ASTContext* pASTContext, Sema* pSema )
 {
-    eg::initialise( pASTContext, pSema );
+    if( g_eg_plugin_interface )
+    {
+        g_eg_plugin_interface->initialise( pASTContext, pSema );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_initialise called when no eg plugin interface" );
+    }
 }
 
 void eg_initialiseMode_Interface( const char* strDatabasePath )
 {
-    eg::initialiseMode_Interface( strDatabasePath );
+    if( g_eg_plugin_interface )
+    {
+        g_eg_plugin_interface->initialiseMode_Interface( strDatabasePath );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_initialiseMode_Interface called when no eg plugin interface" );
+    }
 }
 
 void eg_initialiseMode_Operations( const char* strDatabasePath, 
     const char* strTranslationUnitDatabasePath, unsigned uiTranslationUnitID )
 {
-    eg::initialiseMode_Operations( strDatabasePath, strTranslationUnitDatabasePath, uiTranslationUnitID );
+    if( g_eg_plugin_interface )
+    {
+        g_eg_plugin_interface->initialiseMode_Operations( 
+            strDatabasePath, strTranslationUnitDatabasePath, uiTranslationUnitID );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_initialiseMode_Operations called when no eg plugin interface" );
+    }
 }
     
 void eg_initialiseMode_Implementation()
 {
-    eg::initialiseMode_Implementation();
+    if( g_eg_plugin_interface )
+    {
+        g_eg_plugin_interface->initialiseMode_Implementation();
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_initialiseMode_Implementation called when no eg plugin interface" );
+    }
 }
 
 void eg_runFinalAnalysis()
 {
-    eg::runFinalAnalysis();
+    if( g_eg_plugin_interface )
+    {
+        g_eg_plugin_interface->runFinalAnalysis();
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_runFinalAnalysis called when no eg plugin interface" );
+    }
 }
 
 const char* eg_getTypePathString()
 {
-    return eg::getTypePathString();
+    return eg::EG_TYPE_PATH;
 }
 const char* eg_getInvocationString()
 {
-    return eg::getInvocationString();
+    return eg::EG_INVOCATION_TYPE;
 }
 const char* eg_getVariantString()
 {
-    return eg::getVariantString();
+    return eg::EG_VARIANT_TYPE;
 }
 const char* eg_getInvokeString()
 {
-    return eg::getInvokeString();
+    return eg::EG_INVOKE_MEMBER_FUNCTION_NAME;
 }
 const char* eg_getResultTypeTrait()
 {
-    return eg::getResultTypeTrait();
+    return eg::EG_RESULT_TRAIT_TYPE;
 }
     
 bool eg_isEGEnabled()
 {
-    return eg::isEGEnabled();
+    if( g_eg_plugin_interface )
+    {
+        return g_eg_plugin_interface->isEGEnabled();
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_isEGEnabled called when no eg plugin interface" );
+    }
 }
 
 bool eg_isEGType( const QualType& type )
 {
-    return eg::isEGType( type );
+    if( g_eg_plugin_interface )
+    {
+        return g_eg_plugin_interface->isEGType( type );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_isEGType called when no eg plugin interface" );
+    }
 }
 
 bool eg_isPossibleEGType( const QualType& type )
 {
-    return eg::isPossibleEGType( type );
+    if( g_eg_plugin_interface )
+    {
+        return g_eg_plugin_interface->isPossibleEGType( type );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_isPossibleEGType called when no eg plugin interface" );
+    }
 }
 
 bool eg_isPossibleEGTypeIdentifier( const Token& token )
 {
-    return eg::isPossibleEGTypeIdentifier( token );
+    if( g_eg_plugin_interface )
+    {
+        return g_eg_plugin_interface->isPossibleEGTypeIdentifier( token );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_isPossibleEGTypeIdentifier called when no eg plugin interface" );
+    }
 }
 
 int eg_isPossibleEGTypeIdentifierDecl( const Token& token, bool bIsTypePathParsing )
 {
-    return eg::isPossibleEGTypeIdentifierDecl( token, bIsTypePathParsing );
+    if( g_eg_plugin_interface )
+    {
+        return g_eg_plugin_interface->isPossibleEGTypeIdentifierDecl( token, bIsTypePathParsing );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_isPossibleEGTypeIdentifierDecl called when no eg plugin interface" );
+    }
 }
 
 bool eg_getInvocationOperationType( const SourceLocation& loc, const QualType& typePathType, bool bHasArguments, QualType& operationType )
 {
-    return eg::getInvocationOperationType( loc, typePathType, bHasArguments, operationType );
+    if( g_eg_plugin_interface )
+    {
+        return g_eg_plugin_interface->getInvocationOperationType( loc, typePathType, bHasArguments, operationType );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_getInvocationOperationType called when no eg plugin interface" );
+    }
 }
 
 bool eg_getInvocationResultType( const SourceLocation& loc, const QualType& baseType, QualType& resultType )
 {
-    return eg::getInvocationResultType( loc, baseType, resultType );
+    if( g_eg_plugin_interface )
+    {
+        return g_eg_plugin_interface->getInvocationResultType( loc, baseType, resultType );
+    }
+    else
+    {
+        PLUGIN_ERROR( "eg_getInvocationResultType called when no eg plugin interface" );
+    }
 }
 
 }//clang_eg

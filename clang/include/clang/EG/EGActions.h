@@ -22,6 +22,8 @@ class eg_action : public WrapperFrontendAction
 protected:
     bool BeginInvocation(CompilerInstance &CI) override
     {
+        eg_load_plugin( CI.getFrontendOpts().EGPluginDllPath.c_str() );
+        
         if( !CI.getFrontendOpts().EGDatabasePath.empty() )
         {
             if( CI.getFrontendOpts().EGTranslationUnitDatabasePath.empty() )

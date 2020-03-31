@@ -1664,6 +1664,7 @@ static InputKind ParseFrontendArgs(FrontendOptions &Opts, ArgList &Args,
 
 //EG BEGIN
   //get the eg options
+  Opts.EGPluginDllPath = Args.getLastArgValue( OPT_egdll );
   Opts.EGDatabasePath = Args.getLastArgValue( OPT_egdb );
   Opts.EGCXXFile = Args.getLastArgValue( OPT_egcxx );
   Opts.EGTranslationUnitDatabasePath = Args.getLastArgValue( OPT_egtu );

@@ -589,6 +589,8 @@ def compiler_options_dump : Flag<["-"], "compiler-options-dump">,
 }
 
 //EG BEGIN
+def egdll : Joined<["-"], "egdll=">,
+  HelpText<"EG plugin dll">;
 def egdb : Joined<["-"], "egdb=">,
   HelpText<"EG database file">;
 def egcxx : Joined<["-"], "egcxx=">,

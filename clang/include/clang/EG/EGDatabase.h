@@ -13,6 +13,8 @@ namespace clang
 
     namespace clang_eg 
     {
+		void eg_load_plugin( const char* strPluginPath );
+
         void eg_initialise( ASTContext* pASTContext, Sema* pSema );
         void eg_initialiseMode_Interface( const char* strDatabasePath );
         void eg_initialiseMode_Operations( const char* strDatabasePath, 
