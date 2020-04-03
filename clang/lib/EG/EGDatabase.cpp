@@ -2,7 +2,7 @@
 
 #include "clang/EG/EGDatabase.h"
 
-#include "clang_plugin/clang_plugin.hpp"
+#include "eg_clang_plugin/clang_plugin.hpp"
 
 #include "clang/AST/Type.h"
 
@@ -10,7 +10,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #define PLUGIN_ERROR( msg ) \
-llvm::errs() << msg;\
+llvm::errs() << msg << "\n";\
 std::abort();
 
 namespace clang {
@@ -23,28 +23,44 @@ static llvm::sys::DynamicLibrary g_eg_plugin;
     
 void eg_load_plugin( const char* strPluginPath )
 {
-    g_eg_plugin = llvm::sys::DynamicLibrary::getPermanentLibrary( strPluginPath );
+	bool bEmptyString = false;
+	{
+		if( nullptr == strPluginPath )
+			bEmptyString = true;
+		else if( *strPluginPath == '\0' )
+			bEmptyString = true;
+	}
+	
+	if( !bEmptyString )
+	{
+		//llvm::errs() << "Got plugin path of: " << strPluginPath << "\n";
+		
+		if( nullptr == g_eg_plugin_interface )
+		{
+			g_eg_plugin = llvm::sys::DynamicLibrary::getPermanentLibrary( strPluginPath );
 
-    if( !g_eg_plugin.isValid() )
-    {
-        //error
-        PLUGIN_ERROR( "Failed to load eg clang plugin dll" );
-    }
-    
-    EG_PLUGIN_INTERFACE_GETTER pGetter = 
-		static_cast< EG_PLUGIN_INTERFACE_GETTER >( g_eg_plugin.getAddressOfSymbol( "GET_EG_PLUGIN_INTERFACE" ) );
-    if( !pGetter )
-    {
-        //error
-        PLUGIN_ERROR( "Failed to get GET_EG_PLUGIN_INTERFACE symbol from eg clang plugin dll" );
-    }
-    
-    g_eg_plugin_interface = static_cast< ::eg::EG_PLUGIN_INTERFACE* >( pGetter() );
-    if( !g_eg_plugin_interface )
-    {
-        //error
-        PLUGIN_ERROR( "Failed to acquire eg clang plugin interface from dll" );
-    }
+			if( !g_eg_plugin.isValid() )
+			{
+				//error
+				PLUGIN_ERROR( "Failed to load eg clang plugin dll:" << strPluginPath );
+			}
+			
+			EG_PLUGIN_INTERFACE_GETTER pGetter = 
+				static_cast< EG_PLUGIN_INTERFACE_GETTER >( g_eg_plugin.getAddressOfSymbol( "GET_EG_PLUGIN_INTERFACE" ) );
+			if( !pGetter )
+			{
+				//error
+				PLUGIN_ERROR( "Failed to get GET_EG_PLUGIN_INTERFACE symbol from eg clang plugin dll: " << strPluginPath );
+			}
+			
+			g_eg_plugin_interface = static_cast< ::eg::EG_PLUGIN_INTERFACE* >( pGetter() );
+			if( !g_eg_plugin_interface )
+			{
+				//error
+				PLUGIN_ERROR( "Failed to acquire eg clang plugin interface from dll:" << strPluginPath );
+			}
+		}
+	}
 }
     
 void eg_initialise( ASTContext* pASTContext, Sema* pSema )
@@ -55,7 +71,8 @@ void eg_initialise( ASTContext* pASTContext, Sema* pSema )
     }
     else
     {
-        PLUGIN_ERROR( "eg_initialise called when no eg plugin interface" );
+		//this is not an error - normal usage of the compiler is allowed without
+		//needing to specify the clang_plugin dll
     }
 }
 
@@ -138,7 +155,7 @@ bool eg_isEGEnabled()
     }
     else
     {
-        PLUGIN_ERROR( "eg_isEGEnabled called when no eg plugin interface" );
+		return false;
     }
 }
 
@@ -210,7 +227,8 @@ bool eg_getInvocationResultType( const SourceLocation& loc, const QualType& base
     }
     else
     {
-        PLUGIN_ERROR( "eg_getInvocationResultType called when no eg plugin interface" );
+		return false;
+        //PLUGIN_ERROR( "eg_getInvocationResultType called when no eg plugin interface" );
     }
 }
 
