@@ -674,12 +674,15 @@ TESTING_KEYWORD(__unknown_anytype , KEYALL)
 // eg keywords.
 //===----------------------------------------------------------------------===//
 
+KEYWORD(object, KEYEG)
+KEYWORD(function, KEYEG)
+KEYWORD(event, KEYEG)
 KEYWORD(action, KEYEG)
 KEYWORD(link, KEYEG)
 KEYWORD(dim, KEYEG)
 KEYWORD(include, KEYEG)
-KEYWORD(dynamic, KEYEG)
 KEYWORD(abstract, KEYEG)
+KEYWORD(interface, KEYEG)
 
 KEYWORD(__eg_result_type, KEYCXX)
 //EG END
