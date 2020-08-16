@@ -5,6 +5,11 @@
 #include "llvm/Demangle/StringView.h"
 #include <array>
 
+//ED DEIGHTON change 26 July 2020 - for visual studio 2019 64bit build
+//for some reason string is not included here but is required.
+#include <string>
+//end of change
+
 class OutputStream;
 
 namespace llvm {
